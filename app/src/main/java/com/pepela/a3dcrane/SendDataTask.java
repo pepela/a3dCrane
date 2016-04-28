@@ -16,7 +16,7 @@ import java.net.UnknownHostException;
 public class SendDataTask extends AsyncTask<String, Void, Void> {
 
     String at_cmd = "gaajvi";
-    int PORT = 5556;
+    int PORT = 25000;
     InetAddress inet_addr;
     DatagramSocket socket;
 
@@ -25,7 +25,7 @@ public class SendDataTask extends AsyncTask<String, Void, Void> {
         int x = Integer.parseInt(params[0]);
         int y = Integer.parseInt(params[1]);
 
-        byte[] ip_bytes = new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1};
+        byte[] ip_bytes = new byte[]{(byte) 192, (byte) 168, (byte) 0, (byte) 16};
         try {
             inet_addr = InetAddress.getByAddress(ip_bytes);
         } catch (UnknownHostException e) {
@@ -33,6 +33,7 @@ public class SendDataTask extends AsyncTask<String, Void, Void> {
         }
         Log.e("AT command: ", "at_cmd)");
         byte[] buffer = (at_cmd + "\r").getBytes();
+        buffer =new byte[]{(byte)1};
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inet_addr, PORT);
         try {
             socket = new DatagramSocket();

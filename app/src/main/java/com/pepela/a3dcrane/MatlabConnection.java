@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,30 +24,29 @@ public class MatlabConnection extends Service {
     private Boolean shouldRestartSocketListen = true;
 
 
-    private LocalBroadcastManager broadcaster;
 
     DatagramSocket socket;
 
     private void listenAndWaitAndThrowIntent() throws Exception {
-        Thread.sleep(10000);
-        broadcastIntent("didi ylee");
-//        byte[] recvBuf = new byte[15000];
-//        if (socket == null || socket.isClosed()) {
-//            socket = new DatagramSocket(port);
-//            socket.setBroadcast(true);
-//        }
-//        //socket.setSoTimeout(1000);
-//        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-//        Log.e("UDP", "Waiting for UDP broadcast");
-//        socket.receive(packet);
-//
-//        String senderIP = packet.getAddress().getHostAddress();
-//        String message = new String(packet.getData()).trim();
-//
-//        Log.e("UDP", "Got UDB broadcast from " + senderIP + ", message: " + message);
-//
-//        broadcastIntent(senderIP, message);
-//        socket.close();
+//        Thread.sleep(10000);
+//        broadcastIntent("didi ylee");
+        byte[] recvBuf = new byte[15000];
+        if (socket == null || socket.isClosed()) {
+            socket = new DatagramSocket(portNumber);
+            socket.setBroadcast(true);
+        }
+        //socket.setSoTimeout(1000);
+        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+        Log.e("UDP", "Waiting for UDP broadcast");
+        socket.receive(packet);
+
+        String senderIP = packet.getAddress().getHostAddress();
+        String message = new String(packet.getData()).trim();
+
+        Log.e("UDP", "Got UDB broadcast from " + senderIP + ", message: " + message);
+
+        broadcastIntent(message);
+        socket.close();
     }
 
     private void broadcastIntent(String message) {
@@ -91,7 +89,7 @@ public class MatlabConnection extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        portNumber = intent.getIntExtra(PORT_NUMBER, 2500);
+        portNumber = intent.getIntExtra(PORT_NUMBER, 2501);
         shouldRestartSocketListen = true;
         startListenForUDPBroadcast();
         Log.i("UDP", "Service started");

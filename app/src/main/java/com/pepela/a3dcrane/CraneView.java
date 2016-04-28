@@ -20,21 +20,33 @@ public class CraneView extends View {
     //color resources
     int circleColor;
     int lineColor;
+    int borderColor;
 
     //paints for lines and circle
     private Paint mLinePaint;
     private Paint mCirclePaint;
+    private Paint mBorderPaint;
 
     //circles coordinates
-    private int positionX;
-    private int positionY;
+    private int mPositionX;
+    private int mPositionY;
+    private int mPositionZ;
+
 
     //width and height of our view
     private int mViewWidth;
     private int mViewHeight;
 
+    //dimensions of physical crane
+    private int mSizeX;
+    private int mSizeY;
+    private int mSizeZ;
+
+    private int mTopViewWidth, mTopViewHeight, mFrontViewWidth, mFronViewHeight;
+
     public CraneView(Context context) {
         super(context);
+        init();
     }
 
     public CraneView(Context context, AttributeSet attrs) {
@@ -49,13 +61,17 @@ public class CraneView extends View {
         try {
             circleColor = a.getColor(R.styleable.CraneView_circleColor, 0xff000000);
             lineColor = a.getColor(R.styleable.CraneView_lineColor, 0xff000000);
+            borderColor = a.getColor(R.styleable.CraneView_borderColor, 0xff000000);
+
+            mSizeX = a.getIndex(R.styleable.CraneView_axisX);
+            mSizeY = a.getIndex(R.styleable.CraneView_axisY);
+            mSizeZ = a.getIndex(R.styleable.CraneView_axisZ);
 
             init();
         } finally {
             a.recycle();
         }
     }
-
 
     public CraneView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -69,6 +85,11 @@ public class CraneView extends View {
         try {
             circleColor = a.getColor(R.styleable.CraneView_circleColor, 0xff000000);
             lineColor = a.getColor(R.styleable.CraneView_lineColor, 0xff000000);
+            borderColor = a.getColor(R.styleable.CraneView_borderColor, 0xff000000);
+
+            mSizeX = a.getIndex(R.styleable.CraneView_axisX);
+            mSizeY = a.getIndex(R.styleable.CraneView_axisY);
+            mSizeZ = a.getIndex(R.styleable.CraneView_axisZ);
 
             init();
         } finally {
@@ -78,7 +99,7 @@ public class CraneView extends View {
 
 
     public interface OnCranePositionChangeEventListener {
-        void onPositionChangeEvent(int x, int y);
+        void onPositionChangeEvent(int x, int y, int z);
     }
 
     public void setCranePositionChangeEventListener(OnCranePositionChangeEventListener eventListener) {
@@ -88,16 +109,21 @@ public class CraneView extends View {
 
     private void init() {
         mLinePaint = new Paint();
+        mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setColor(lineColor);
 
         mCirclePaint = new Paint();
         mCirclePaint.setColor(circleColor);
 
+        mBorderPaint = new Paint();
+        mBorderPaint.setStyle(Paint.Style.STROKE);
+        mBorderPaint.setColor(Color.BLACK);
+
     }
 
     public void setPosition(@NonNull int cranePositionX, @NonNull int cranePositionY) {
-        this.positionX = cranePositionX;
-        this.positionY = cranePositionY;
+        this.mPositionX = cranePositionX;
+        this.mPositionY = cranePositionY;
         invalidate();
     }
 
@@ -143,8 +169,19 @@ public class CraneView extends View {
         mViewWidth = width;
         mViewHeight = height;
 
-        positionX = width / 2;
-        positionY = height / 2;
+        mFrontViewWidth = width / 5;
+
+        mTopViewHeight = width > height ? height : width;
+        if (height > width) {
+            mTopViewHeight -= mFrontViewWidth;
+        }
+
+        mTopViewWidth = mTopViewHeight;
+        mFronViewHeight = mTopViewHeight;
+
+        mPositionX = mTopViewHeight / 2;
+        mPositionY = mTopViewWidth / 2;
+        mPositionZ = mFronViewHeight / 2;
 
         //MUST CALL THIS
         setMeasuredDimension(width, height);
@@ -154,24 +191,47 @@ public class CraneView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawLine(positionX, 0, positionX, mViewHeight, mLinePaint);
-        canvas.drawLine(0, positionY, mViewWidth, positionY, mLinePaint);
+        //draw border
+        canvas.drawRect(0, 0, mTopViewWidth, mTopViewHeight, mBorderPaint);
 
-        canvas.drawCircle(positionX, positionY, 20, mCirclePaint);
+        //draw vertical and horizontal lines
+        canvas.drawLine(mPositionX, 0, mPositionX, mTopViewHeight, mLinePaint);
+        canvas.drawLine(0, mPositionY, mTopViewWidth, mPositionY, mLinePaint);
 
+        //draw center
+        canvas.drawCircle(mPositionX, mPositionY, 20, mCirclePaint);
+
+        //draw up and down
+        canvas.drawRect(mTopViewWidth, 0, mTopViewWidth + mFrontViewWidth, mTopViewHeight, mBorderPaint);
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2, 0, mTopViewWidth + mFrontViewWidth / 2, mTopViewHeight, mLinePaint);
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2, mPositionZ, mTopViewWidth, mPositionZ, mLinePaint);
+        canvas.drawCircle(mTopViewWidth + mFrontViewWidth / 2, mPositionZ, 20, mCirclePaint);
 
         Paint paint = new Paint();
 
-
         paint.setColor(Color.BLACK);
         paint.setTextSize(20);
-        canvas.drawText(String.format("x = %d\ny = %d", positionX, positionY), 10, 25, paint);
+        canvas.drawText(String.format("x = %d y = %d z = %d", mPositionX, mPositionY, mPositionZ), 10, 25, paint);
+
+        drawIntervals(canvas, 10, 50);
+    }
+
+    private void drawIntervals(Canvas canvas, int height, int intervalLength) {
+        int horizontalCount = mTopViewWidth / intervalLength;
+        int verticalCount = mTopViewHeight / intervalLength;
+        for (int i = 0; i <= horizontalCount; i++)
+            canvas.drawLine(intervalLength * i, mTopViewHeight, intervalLength * i, mTopViewHeight - height, mBorderPaint);
+        for (int i = 0; i <= verticalCount; i++) {
+            canvas.drawLine(mTopViewWidth, intervalLength * i, mTopViewWidth - height, intervalLength * i, mBorderPaint);
+            canvas.drawLine(mTopViewWidth, intervalLength * i, mTopViewWidth + height, intervalLength * i, mBorderPaint);
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         boolean handled = false;
+        boolean throwEvent = true;
 
         int xTouch;
         int yTouch;
@@ -182,14 +242,21 @@ public class CraneView extends View {
                 xTouch = (int) event.getX(0);
                 yTouch = (int) event.getY(0);
 
-                positionX = xTouch;
-                positionY = yTouch;
+
+                if (isTopSideView(xTouch, yTouch)) {
+                    mPositionX = xTouch;
+                    mPositionY = yTouch;
+                } else if (isFronSideView(xTouch, yTouch)) {
+                    mPositionZ = yTouch;
+                } else {
+                    throwEvent = false;
+                }
 
                 invalidate();
                 handled = true;
 
-                if (mListener != null)
-                    mListener.onPositionChangeEvent(xTouch, yTouch);
+                if (mListener != null && throwEvent)
+                    mListener.onPositionChangeEvent(mPositionX, mPositionY, mPositionZ);
 
                 break;
 
@@ -197,14 +264,20 @@ public class CraneView extends View {
                 xTouch = (int) event.getX(0);
                 yTouch = (int) event.getY(0);
 
-                positionX = xTouch;
-                positionY = yTouch;
+                if (isTopSideView(xTouch, yTouch)) {
+                    mPositionX = xTouch;
+                    mPositionY = yTouch;
+                } else if (isFronSideView(xTouch, yTouch)) {
+                    mPositionZ = yTouch;
+                } else {
+                    throwEvent = false;
+                }
 
                 invalidate();
                 handled = true;
 
-                if (mListener != null)
-                    mListener.onPositionChangeEvent(xTouch, yTouch);
+                if (mListener != null && throwEvent)
+                    mListener.onPositionChangeEvent(mPositionX, mPositionY, mPositionZ);
 
                 break;
 
@@ -218,5 +291,17 @@ public class CraneView extends View {
         }
 
         return super.onTouchEvent(event) || handled;
+    }
+
+    private boolean isTopSideView(int x, int y) {
+        if (x >= 0 && x <= mTopViewWidth && y >= 0 && y <= mTopViewHeight)
+            return true;
+        return false;
+    }
+
+    private boolean isFronSideView(int x, int y) {
+        if (x >= mTopViewWidth && x <= mTopViewWidth + mFrontViewWidth && y >= 0 && y <= mFronViewHeight)
+            return true;
+        return false;
     }
 }

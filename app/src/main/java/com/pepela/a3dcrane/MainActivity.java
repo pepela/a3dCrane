@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
         craneView = (CraneView) findViewById(R.id.crane);
 
         serviceIntent = new Intent(this, MatlabConnection.class);
-        serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, 25000);
-        startService(serviceIntent);
+        serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, 25001);
+        //startService(serviceIntent);
 
         udpReceiveBroadcastReceiver = new Receiver();
         filter = new IntentFilter(MatlabConnection.UDP_BROADCAST);
@@ -59,14 +59,16 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     @Override
     protected void onPause() {
         super.onPause();
-        stopService(serviceIntent);
+        //stopService(serviceIntent);
         this.unregisterReceiver(udpReceiveBroadcastReceiver);
     }
 
     @Override
-    public void onPositionChangeEvent(int x, int y) {
-        Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s", x, y), Toast.LENGTH_SHORT).show();
-        startCommunication(x, y);
+    public void onPositionChangeEvent(int x, int y, int z) {
+        //Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s  z: %s", x, y, z), Toast.LENGTH_SHORT).show();
+        //startCommunication(x, y);
+        SendDataTask sdt = new SendDataTask();
+        sdt.execute("1","2");
     }
 
     // Create runnable for posting
@@ -88,13 +90,15 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                         clientSocket = new DatagramSocket(null);
                         clientSocket.setReuseAddress(true);
                         clientSocket.setBroadcast(true);
-                        clientSocket.bind(new InetSocketAddress(25000));
+                        clientSocket.bind(new InetSocketAddress(25001));
                     }
-                    byte[] receivedData = new byte[1024];
+                    byte[] receivedData = new byte[16];
                     while (true) {
                         DatagramPacket recv_packet = new DatagramPacket(receivedData, receivedData.length);
                         Log.d("UDP", "S: Receiving...");
                         clientSocket.receive(recv_packet);
+
+                        byte[] ada = recv_packet.getData();
 
                         String rec_str = new String(recv_packet.getData());
                         Log.d("UDP", "Received: " + rec_str);

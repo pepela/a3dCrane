@@ -9,6 +9,7 @@
     <com.pepela.a3dcrane.CraneView
         android:id="@+id/crane"
         app:lineColor="@color/red"
+        app:circleColor="@color/blue"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

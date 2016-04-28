@@ -4,6 +4,10 @@
     <declare-styleable name="CraneView">
         <attr name="lineColor" format="color" />
         <attr name="circleColor" format="color" />
+        <attr name="borderColor" format="color" />
+        <attr name="axisX" format="integer" />
+        <attr name="axisY" format="integer" />
+        <attr name="axisZ" format="integer" />
     </declare-styleable>
 
 </resources>
