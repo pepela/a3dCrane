@@ -5,6 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 
 
 import android.app.Service;
@@ -24,13 +25,12 @@ public class MatlabConnection extends Service {
     private Boolean shouldRestartSocketListen = true;
 
 
-
     DatagramSocket socket;
 
     private void listenAndWaitAndThrowIntent() throws Exception {
 //        Thread.sleep(10000);
 //        broadcastIntent("didi ylee");
-        byte[] recvBuf = new byte[15000];
+        byte[] recvBuf = new byte[1];
         if (socket == null || socket.isClosed()) {
             socket = new DatagramSocket(portNumber);
             socket.setBroadcast(true);
@@ -41,7 +41,10 @@ public class MatlabConnection extends Service {
         socket.receive(packet);
 
         String senderIP = packet.getAddress().getHostAddress();
-        String message = new String(packet.getData()).trim();
+        //String message = new String(packet.getData()).trim();
+
+        byte[] arr = packet.getData();
+        String message = Integer.toString((int) arr[0]);
 
         Log.e("UDP", "Got UDB broadcast from " + senderIP + ", message: " + message);
 

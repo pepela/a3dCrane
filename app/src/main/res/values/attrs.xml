@@ -8,6 +8,7 @@
         <attr name="axisX" format="integer" />
         <attr name="axisY" format="integer" />
         <attr name="axisZ" format="integer" />
+        <attr name="border" format="integer" />
     </declare-styleable>
 
 </resources>

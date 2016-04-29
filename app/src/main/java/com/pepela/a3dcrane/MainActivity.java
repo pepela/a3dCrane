@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
 
         serviceIntent = new Intent(this, MatlabConnection.class);
         serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, 25001);
-        //startService(serviceIntent);
+        startService(serviceIntent);
 
         udpReceiveBroadcastReceiver = new Receiver();
         filter = new IntentFilter(MatlabConnection.UDP_BROADCAST);
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             String url = arg1.getStringExtra(MatlabConnection.INTENT_DATA);
-            Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     @Override
     protected void onPause() {
         super.onPause();
-        //stopService(serviceIntent);
+        stopService(serviceIntent);
         this.unregisterReceiver(udpReceiveBroadcastReceiver);
     }
 

@@ -26,6 +26,7 @@ public class CraneView extends View {
     private Paint mLinePaint;
     private Paint mCirclePaint;
     private Paint mBorderPaint;
+    private Paint mIntervalPaint;
 
     //circles coordinates
     private int mPositionX;
@@ -41,8 +42,24 @@ public class CraneView extends View {
     private int mSizeX;
     private int mSizeY;
     private int mSizeZ;
+    private int mSizeBorder;
 
-    private int mTopViewWidth, mTopViewHeight, mFrontViewWidth, mFronViewHeight;
+    //ration between physycal device measurements and pixels
+    private static float mRatioX;
+    private static float mRatioY;
+    private static float mRatioZ;
+
+    //interval size in cm, default is 10cm
+    private int mIntervalSize = 20;
+
+    public static final int AXIS_X = 0;
+    public static final int AXIS_Y = 1;
+    public static final int AXIS_Z = 2;
+
+    private float mBorderWidth;
+
+
+    private int mTopViewWidth, mTopViewHeight, mFrontViewWidth, mFrontViewHeight;
 
     public CraneView(Context context) {
         super(context);
@@ -63,10 +80,20 @@ public class CraneView extends View {
             lineColor = a.getColor(R.styleable.CraneView_lineColor, 0xff000000);
             borderColor = a.getColor(R.styleable.CraneView_borderColor, 0xff000000);
 
-            mSizeX = a.getIndex(R.styleable.CraneView_axisX);
-            mSizeY = a.getIndex(R.styleable.CraneView_axisY);
-            mSizeZ = a.getIndex(R.styleable.CraneView_axisZ);
+            if (!a.hasValue(R.styleable.CraneView_axisX))
+                throw new RuntimeException("Defining axisX is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_axisY))
+                throw new RuntimeException("Defining axisY is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_axisZ))
+                throw new RuntimeException("Defining axisZ is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_border))
+                throw new RuntimeException("Defining border is required for CraneView");
 
+
+            mSizeX = a.getInt(R.styleable.CraneView_axisX, -1);
+            mSizeY = a.getInt(R.styleable.CraneView_axisY, -1);
+            mSizeZ = a.getInt(R.styleable.CraneView_axisZ, -1);
+            mSizeBorder = a.getInt(R.styleable.CraneView_border, -1);
             init();
         } finally {
             a.recycle();
@@ -87,9 +114,20 @@ public class CraneView extends View {
             lineColor = a.getColor(R.styleable.CraneView_lineColor, 0xff000000);
             borderColor = a.getColor(R.styleable.CraneView_borderColor, 0xff000000);
 
-            mSizeX = a.getIndex(R.styleable.CraneView_axisX);
-            mSizeY = a.getIndex(R.styleable.CraneView_axisY);
-            mSizeZ = a.getIndex(R.styleable.CraneView_axisZ);
+            if (!a.hasValue(R.styleable.CraneView_axisX))
+                throw new RuntimeException("Defining axisX is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_axisY))
+                throw new RuntimeException("Defining axisY is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_axisZ))
+                throw new RuntimeException("Defining axisZ is required for CraneView");
+            if (!a.hasValue(R.styleable.CraneView_border))
+                throw new RuntimeException("Defining border is required for CraneView");
+
+            mSizeX = a.getInt(R.styleable.CraneView_axisX, -1);
+            mSizeY = a.getInt(R.styleable.CraneView_axisY, -1);
+            mSizeZ = a.getInt(R.styleable.CraneView_axisZ, -1);
+            mSizeBorder = a.getInt(R.styleable.CraneView_border, -1);
+
 
             init();
         } finally {
@@ -117,8 +155,12 @@ public class CraneView extends View {
 
         mBorderPaint = new Paint();
         mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setColor(Color.BLACK);
+        mBorderPaint.setColor(borderColor);
+        mBorderPaint.setStrokeWidth(10);
 
+        mIntervalPaint = new Paint();
+        mIntervalPaint.setStyle(Paint.Style.STROKE);
+        mIntervalPaint.setColor(Color.BLACK);
     }
 
     public void setPosition(@NonNull int cranePositionX, @NonNull int cranePositionY) {
@@ -177,11 +219,21 @@ public class CraneView extends View {
         }
 
         mTopViewWidth = mTopViewHeight;
-        mFronViewHeight = mTopViewHeight;
+        mFrontViewHeight = mTopViewHeight;
 
         mPositionX = mTopViewHeight / 2;
         mPositionY = mTopViewWidth / 2;
-        mPositionZ = mFronViewHeight / 2;
+        mPositionZ = mFrontViewHeight / 2;
+
+        try {
+            mRatioX = (float) mTopViewWidth / mSizeX;
+            mRatioY = (float) mTopViewHeight / mSizeY;
+            mRatioZ = (float) mFrontViewHeight / mSizeZ;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mBorderWidth = convertCmToPixel(mSizeBorder, AXIS_X);
 
         //MUST CALL THIS
         setMeasuredDimension(width, height);
@@ -191,21 +243,52 @@ public class CraneView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        //draw border
-        canvas.drawRect(0, 0, mTopViewWidth, mTopViewHeight, mBorderPaint);
+        mBorderPaint.setStrokeWidth(mBorderWidth);
+
+        //draw borders
+        canvas.drawRect(mBorderWidth / 2,
+                mBorderWidth / 2,
+                mTopViewWidth - mBorderWidth / 2,
+                mTopViewHeight - mBorderWidth / 2,
+                mBorderPaint);
+        canvas.drawLine(mTopViewWidth,
+                mBorderWidth / 2,
+                mTopViewWidth + mFrontViewWidth,
+                mBorderWidth / 2,
+                mBorderPaint);
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
+                mBorderWidth / 2,
+                mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
+                mFrontViewHeight,
+                mBorderPaint);
+
+
+//        canvas.drawRect(mTopViewWidth,
+//                mBorderWidth / 2,
+//                mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
+//                mTopViewHeight - mBorderWidth / 2,
+//                mBorderPaint);
+
 
         //draw vertical and horizontal lines
-        canvas.drawLine(mPositionX, 0, mPositionX, mTopViewHeight, mLinePaint);
-        canvas.drawLine(0, mPositionY, mTopViewWidth, mPositionY, mLinePaint);
+        canvas.drawLine(mPositionX, mBorderWidth, mPositionX, mTopViewHeight, mLinePaint);
+        canvas.drawLine(mBorderWidth, mPositionY, mTopViewWidth, mPositionY, mLinePaint);
 
         //draw center
         canvas.drawCircle(mPositionX, mPositionY, 20, mCirclePaint);
 
         //draw up and down
-        canvas.drawRect(mTopViewWidth, 0, mTopViewWidth + mFrontViewWidth, mTopViewHeight, mBorderPaint);
-        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2, 0, mTopViewWidth + mFrontViewWidth / 2, mTopViewHeight, mLinePaint);
-        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2, mPositionZ, mTopViewWidth, mPositionZ, mLinePaint);
-        canvas.drawCircle(mTopViewWidth + mFrontViewWidth / 2, mPositionZ, 20, mCirclePaint);
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2,
+                mBorderWidth,
+                mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2,
+                mTopViewHeight,
+                mLinePaint);
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2,
+                mPositionZ,
+                mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
+                mPositionZ,
+                mLinePaint);
+        canvas.drawCircle(mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2, mPositionZ, 20, mCirclePaint);
 
         Paint paint = new Paint();
 
@@ -213,17 +296,80 @@ public class CraneView extends View {
         paint.setTextSize(20);
         canvas.drawText(String.format("x = %d y = %d z = %d", mPositionX, mPositionY, mPositionZ), 10, 25, paint);
 
-        drawIntervals(canvas, 10, 50);
+        float actualPositionX = pixelToCm(mPositionX, AXIS_X);
+        float actualPositionY = pixelToCm(mPositionY, AXIS_Y);
+        float actualPositionZ = pixelToCm(mPositionZ, AXIS_Z);
+
+        canvas.drawText(String.format("x = %f y = %f z = %f", actualPositionX, actualPositionY, actualPositionZ), 10, 45, paint);
+
+        drawIntervals(canvas);
     }
 
-    private void drawIntervals(Canvas canvas, int height, int intervalLength) {
-        int horizontalCount = mTopViewWidth / intervalLength;
-        int verticalCount = mTopViewHeight / intervalLength;
-        for (int i = 0; i <= horizontalCount; i++)
-            canvas.drawLine(intervalLength * i, mTopViewHeight, intervalLength * i, mTopViewHeight - height, mBorderPaint);
-        for (int i = 0; i <= verticalCount; i++) {
-            canvas.drawLine(mTopViewWidth, intervalLength * i, mTopViewWidth - height, intervalLength * i, mBorderPaint);
-            canvas.drawLine(mTopViewWidth, intervalLength * i, mTopViewWidth + height, intervalLength * i, mBorderPaint);
+    private void drawIntervals(Canvas canvas) {
+
+        int intervalLengthInPixelsX = (int) convertCmToPixel(mIntervalSize, AXIS_X);//mIntervalSize * (int) mRatioX;
+        int intervalLengthInPixelsY = (int) convertCmToPixel(mIntervalSize, AXIS_Y);//mIntervalSize * (int) mRatioX;
+        int intervalLengthInPixelsZ = (int) convertCmToPixel(mIntervalSize, AXIS_Z);//mIntervalSize * (int) mRatioZ;
+
+        int intervalCountX = (mSizeX - 2 * mSizeBorder) / mIntervalSize; //mTopViewWidth / intervalLengthInPixelsX;
+        int intervalCountY = (mSizeY - 2 * mSizeBorder) / mIntervalSize; //mTopViewHeight / intervalLengthInPixelsX;
+        int intervalCountZ = (mSizeZ - 2 * mSizeBorder) / mIntervalSize; //mFrontViewHeight / intervalLengthInPixelsZ;
+
+        for (int i = 0; i <= intervalCountX; i++) {
+            canvas.drawLine(mBorderWidth + intervalLengthInPixelsX * i,
+                    mTopViewHeight,
+                    mBorderWidth + intervalLengthInPixelsX * i,
+                    mTopViewHeight - mBorderWidth,
+                    mIntervalPaint);
+            canvas.drawText(Float.toString(i * mIntervalSize),
+                    mBorderWidth + intervalLengthInPixelsX * i + 5,
+                    mTopViewHeight - 5,
+                    mIntervalPaint);
+        }
+        canvas.drawLine(mTopViewWidth - mBorderWidth,
+                mTopViewHeight,
+                mTopViewWidth - mBorderWidth,
+                mTopViewHeight - mBorderWidth,
+                mIntervalPaint);
+        canvas.drawText(Float.toString(mSizeX - 2 * mSizeBorder),
+                mTopViewWidth - mBorderWidth,
+                mTopViewHeight - 5,
+                mIntervalPaint);
+
+        for (int i = 0; i <= intervalCountY; i++) {
+            canvas.drawLine(mTopViewWidth - mBorderWidth,
+                    mBorderWidth + intervalLengthInPixelsY * i,
+                    mTopViewWidth,
+                    mBorderWidth + intervalLengthInPixelsY * i,
+                    mIntervalPaint);
+
+            canvas.drawText(Float.toString(i * mIntervalSize),
+                    mTopViewWidth - mBorderWidth,
+                    mBorderWidth + intervalLengthInPixelsY * i - 5,
+                    mIntervalPaint);
+        }
+        canvas.drawLine(mTopViewWidth - mBorderWidth,
+                mTopViewHeight - mBorderWidth,
+                mTopViewWidth,
+                mTopViewHeight - mBorderWidth,
+                mIntervalPaint);
+
+        canvas.drawText(Float.toString(mSizeY - 2 * mSizeBorder),
+                mTopViewWidth - mBorderWidth,
+                mTopViewHeight - mBorderWidth - 5,
+                mIntervalPaint);
+
+        for (int i = 0; i <= intervalCountZ; i++) {
+            canvas.drawLine(mTopViewWidth + mFrontViewWidth - mBorderWidth,
+                    mBorderWidth + intervalLengthInPixelsZ * i,
+                    mTopViewWidth + mFrontViewWidth,
+                    mBorderWidth + intervalLengthInPixelsZ * i,
+                    mIntervalPaint);
+
+            canvas.drawText(Float.toString(i * mIntervalSize),
+                    mTopViewWidth + mFrontViewWidth - mBorderWidth,
+                    mBorderWidth + intervalLengthInPixelsZ * i,
+                    mIntervalPaint);
         }
     }
 
@@ -246,7 +392,7 @@ public class CraneView extends View {
                 if (isTopSideView(xTouch, yTouch)) {
                     mPositionX = xTouch;
                     mPositionY = yTouch;
-                } else if (isFronSideView(xTouch, yTouch)) {
+                } else if (isFrontSideView(xTouch, yTouch)) {
                     mPositionZ = yTouch;
                 } else {
                     throwEvent = false;
@@ -267,7 +413,7 @@ public class CraneView extends View {
                 if (isTopSideView(xTouch, yTouch)) {
                     mPositionX = xTouch;
                     mPositionY = yTouch;
-                } else if (isFronSideView(xTouch, yTouch)) {
+                } else if (isFrontSideView(xTouch, yTouch)) {
                     mPositionZ = yTouch;
                 } else {
                     throwEvent = false;
@@ -293,15 +439,45 @@ public class CraneView extends View {
         return super.onTouchEvent(event) || handled;
     }
 
+    private float convertCmToPixel(int sizeInCm, int axis) {
+        switch (axis) {
+            case AXIS_X:
+                return sizeInCm * mRatioX;
+            case AXIS_Y:
+                return sizeInCm * mRatioY;
+            case AXIS_Z:
+                return sizeInCm * mRatioZ;
+        }
+        return 0;
+    }
+
     private boolean isTopSideView(int x, int y) {
-        if (x >= 0 && x <= mTopViewWidth && y >= 0 && y <= mTopViewHeight)
+        if (x >= mBorderWidth
+                && x <= mTopViewWidth - mBorderWidth
+                && y >= mBorderWidth
+                && y <= mTopViewHeight - mBorderWidth)
             return true;
         return false;
     }
 
-    private boolean isFronSideView(int x, int y) {
-        if (x >= mTopViewWidth && x <= mTopViewWidth + mFrontViewWidth && y >= 0 && y <= mFronViewHeight)
+    private boolean isFrontSideView(int x, int y) {
+        if (x >= mTopViewWidth
+                && x <= mTopViewWidth + mFrontViewWidth
+                && y >= mBorderWidth
+                && y <= mFrontViewHeight - mBorderWidth / 2)
             return true;
         return false;
+    }
+
+    public static float pixelToCm(int lengthInPixels, int axis) {
+        switch (axis) {
+            case AXIS_X:
+                return lengthInPixels / mRatioX;
+            case AXIS_Y:
+                return lengthInPixels / mRatioY;
+            case AXIS_Z:
+                return lengthInPixels / mRatioZ;
+        }
+        return 0;
     }
 }
