@@ -7,7 +7,11 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.net.DatagramPacket;
@@ -24,12 +28,65 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     private IntentFilter filter;
     private Intent serviceIntent;
 
+    private Button mSetButton;
+    private EditText mXEditText;
+    private EditText mYEditText;
+    private EditText mZEditText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         craneView = (CraneView) findViewById(R.id.crane);
+
+        mXEditText = (EditText) findViewById(R.id.mainEditTextX);
+        mYEditText = (EditText) findViewById(R.id.mainEditTextY);
+        mZEditText = (EditText) findViewById(R.id.mainEditTextZ);
+
+        mSetButton = (Button) findViewById(R.id.mainButtonSet);
+
+        mSetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                boolean itsOk = true;
+
+                String xStr = mXEditText.getText().toString();
+                String yStr = mYEditText.getText().toString();
+                String zStr = mZEditText.getText().toString();
+
+                if (TextUtils.isEmpty(xStr)) {
+                    mXEditText.setError("Required");
+                    itsOk = false;
+                } else if (TextUtils.isEmpty(yStr)) {
+                    mYEditText.setError("Required");
+                    itsOk = false;
+                } else if (TextUtils.isEmpty(zStr)) {
+                    mZEditText.setError("Required");
+                    itsOk = false;
+                }
+
+                if (!itsOk)
+                    return;
+
+
+                float x = Float.valueOf(xStr);
+                float y = Float.valueOf(yStr);
+                float z = Float.valueOf(zStr);
+
+                craneView.setPosition(x, y, z);
+
+                SendDataTask sdt = new SendDataTask();
+                sdt.execute(x, y, z);
+            }
+        });
+
+
+        mXEditText.setText(String.format("%.2f", craneView.getXInCm()));
+        mYEditText.setText(String.format("%.2f", craneView.getYInCm()));
+        mZEditText.setText(String.format("%.2f", craneView.getZInCm()));
+
 
         serviceIntent = new Intent(this, MatlabConnection.class);
         serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, 25001);
@@ -44,7 +101,15 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            String url = arg1.getStringExtra(MatlabConnection.INTENT_DATA);
+            float x = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_X, 10);
+            float y = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Y, 10);
+            float z = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Z, 10);
+
+            mXEditText.setText(String.format("%.2f", craneView.getXInCm()));
+            mYEditText.setText(String.format("%.2f", craneView.getYInCm()));
+            mZEditText.setText(String.format("%.2f", craneView.getZInCm()));
+
+            craneView.setPosition(x, y, z);
             //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
         }
     }
@@ -64,61 +129,16 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     }
 
     @Override
-    public void onPositionChangeEvent(int x, int y, int z) {
+    public void onPositionChangeEvent(float x, float y, float z) {
         //Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s  z: %s", x, y, z), Toast.LENGTH_SHORT).show();
         //startCommunication(x, y);
+
+        mXEditText.setText(String.format("%.2f", x));
+        mYEditText.setText(String.format("%.2f", y));
+        mZEditText.setText(String.format("%.2f", z));
+
         SendDataTask sdt = new SendDataTask();
-        sdt.execute("1","2");
-    }
-
-    // Create runnable for posting
-    final Runnable mUpdateResults = new Runnable() {
-        public void run() {
-            updateResultsInUi();
-        }
-    };
-
-
-    protected void startCommunication(int x, int y) {
-
-        // Fire off a thread to do some work that we shouldn't do directly in the UI thread
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    DatagramSocket clientSocket = null;
-                    if (clientSocket == null) {
-                        clientSocket = new DatagramSocket(null);
-                        clientSocket.setReuseAddress(true);
-                        clientSocket.setBroadcast(true);
-                        clientSocket.bind(new InetSocketAddress(25001));
-                    }
-                    byte[] receivedData = new byte[16];
-                    while (true) {
-                        DatagramPacket recv_packet = new DatagramPacket(receivedData, receivedData.length);
-                        Log.d("UDP", "S: Receiving...");
-                        clientSocket.receive(recv_packet);
-
-                        byte[] ada = recv_packet.getData();
-
-                        String rec_str = new String(recv_packet.getData());
-                        Log.d("UDP", "Received: " + rec_str);
-
-                        InetAddress ipAddress = recv_packet.getAddress();
-                        int port = recv_packet.getPort();
-                        Log.d("UDP", "IPAddress : " + ipAddress.toString());
-                        Log.d("UDP", " Port : " + Integer.toString(port));
-                    }
-                } catch (Exception e) {
-                    Log.e("UDP", "S: Error", e);
-                }
-                mHandler.post(mUpdateResults);
-            }
-        };
-        t.start();
-    }
-
-    private void updateResultsInUi() {
-        //Toast.makeText(getApplicationContext(), "ok we are here", Toast.LENGTH_SHORT).show();
+        sdt.execute(x, y, z);
     }
 
 

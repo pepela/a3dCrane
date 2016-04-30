@@ -16,7 +16,9 @@ import android.widget.Toast;
 
 public class MatlabConnection extends Service {
     public static String UDP_BROADCAST = "UDPBroadcast";
-    public static String INTENT_DATA = "com.pepela.a3dcrane.intent_data.message";
+    public static String INTENT_DATA_X = "com.pepela.a3dcrane.intent_data.x";
+    public static String INTENT_DATA_Y = "com.pepela.a3dcrane.intent_data.y";
+    public static String INTENT_DATA_Z = "com.pepela.a3dcrane.intent_data.z";
     public static String PORT_NUMBER = "com.pepela.a3dcrane.intent_data.port_number";
 
     private int portNumber;
@@ -28,9 +30,8 @@ public class MatlabConnection extends Service {
     DatagramSocket socket;
 
     private void listenAndWaitAndThrowIntent() throws Exception {
-//        Thread.sleep(10000);
-//        broadcastIntent("didi ylee");
-        byte[] recvBuf = new byte[1];
+
+        byte[] recvBuf = new byte[3];
         if (socket == null || socket.isClosed()) {
             socket = new DatagramSocket(portNumber);
             socket.setBroadcast(true);
@@ -44,18 +45,22 @@ public class MatlabConnection extends Service {
         //String message = new String(packet.getData()).trim();
 
         byte[] arr = packet.getData();
-        String message = Integer.toString((int) arr[0]);
+        float x = (float) arr[0];
+        float y = (float) arr[1];
+        float z = (float) arr[2];
 
-        Log.e("UDP", "Got UDB broadcast from " + senderIP + ", message: " + message);
+        Log.e("UDP", "Got UDB broadcast from " + senderIP + String.format("x = %f, y = %f, z = %f", x, y, z));
 
-        broadcastIntent(message);
+        broadcastIntent(x, y, z);
         socket.close();
     }
 
-    private void broadcastIntent(String message) {
+    private void broadcastIntent(float x, float y, float z) {
         Log.e("Broadcast", "broadcasting intent");
         Intent intent = new Intent(UDP_BROADCAST);
-        intent.putExtra(INTENT_DATA, message);
+        intent.putExtra(INTENT_DATA_X, x);
+        intent.putExtra(INTENT_DATA_Y, y);
+        intent.putExtra(INTENT_DATA_Z, z);
         sendBroadcast(intent);
     }
 

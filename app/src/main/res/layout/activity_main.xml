@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.pepela.a3dcrane.MainActivity">
 
     <com.pepela.a3dcrane.CraneView
         android:id="@+id/crane"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:axisX="100"
         app:axisY="100"
         app:axisZ="100"
@@ -17,4 +18,40 @@
         app:borderColor="@color/yellow"
         app:circleColor="@color/blue"
         app:lineColor="@color/red" />
-</FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/mainEditTextX"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="x"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/mainEditTextY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="y"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/mainEditTextZ"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="z"
+            android:inputType="numberDecimal" />
+
+        <Button
+            android:id="@+id/mainButtonSet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/set" />
+    </LinearLayout>
+</LinearLayout>

@@ -29,9 +29,9 @@ public class CraneView extends View {
     private Paint mIntervalPaint;
 
     //circles coordinates
-    private int mPositionX;
-    private int mPositionY;
-    private int mPositionZ;
+    private int mPositionX = -1;
+    private int mPositionY = -1;
+    private int mPositionZ = -1;
 
 
     //width and height of our view
@@ -56,7 +56,7 @@ public class CraneView extends View {
     public static final int AXIS_Y = 1;
     public static final int AXIS_Z = 2;
 
-    private float mBorderWidth;
+    private int mBorderWidth;
 
 
     private int mTopViewWidth, mTopViewHeight, mFrontViewWidth, mFrontViewHeight;
@@ -137,7 +137,7 @@ public class CraneView extends View {
 
 
     public interface OnCranePositionChangeEventListener {
-        void onPositionChangeEvent(int x, int y, int z);
+        void onPositionChangeEvent(float x, float y, float z);
     }
 
     public void setCranePositionChangeEventListener(OnCranePositionChangeEventListener eventListener) {
@@ -163,10 +163,30 @@ public class CraneView extends View {
         mIntervalPaint.setColor(Color.BLACK);
     }
 
-    public void setPosition(@NonNull int cranePositionX, @NonNull int cranePositionY) {
-        this.mPositionX = cranePositionX;
-        this.mPositionY = cranePositionY;
+    public void setPosition(@NonNull float cranePositionX, @NonNull float cranePositionY, @NonNull float cranePositionZ) {
+
+        this.mPositionX = mBorderWidth + convertCmToPixel(cranePositionX, AXIS_X);
+        this.mPositionY = mBorderWidth + convertCmToPixel(cranePositionY, AXIS_Y);
+        this.mPositionZ = mBorderWidth + convertCmToPixel(cranePositionZ, AXIS_Z);
+
+//        this.mPositionX = cranePositionX;
+//        this.mPositionY = cranePositionY;
+//        this.mPositionY = cranePositionZ;
         invalidate();
+    }
+
+    public float getXInCm() {
+        return pixelToCm(mPositionX - mBorderWidth, AXIS_X);
+    }
+
+    public float getYInCm() {
+
+        return pixelToCm(mPositionY - mBorderWidth, AXIS_Y);
+    }
+
+    public float getZInCm() {
+        return pixelToCm(mPositionZ - mBorderWidth, AXIS_Z);
+
     }
 
     @Override
@@ -190,7 +210,7 @@ public class CraneView extends View {
             width = widthSize;
         } else if (widthMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            width = Math.min(desiredWidth, widthSize);
+            width = widthSize;//Math.min(desiredWidth, widthSize);
         } else {
             //Be whatever you want
             width = desiredWidth;
@@ -202,7 +222,7 @@ public class CraneView extends View {
             height = heightSize;
         } else if (heightMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            height = Math.min(desiredHeight, heightSize);
+            height = heightSize;//Math.min(desiredHeight, heightSize);
         } else {
             //Be whatever you want
             height = desiredHeight;
@@ -221,9 +241,12 @@ public class CraneView extends View {
         mTopViewWidth = mTopViewHeight;
         mFrontViewHeight = mTopViewHeight;
 
-        mPositionX = mTopViewHeight / 2;
-        mPositionY = mTopViewWidth / 2;
-        mPositionZ = mFrontViewHeight / 2;
+        if (mPositionX == -1)
+            mPositionX = mTopViewHeight / 2;
+        if (mPositionY == -1)
+            mPositionY = mTopViewWidth / 2;
+        if (mPositionZ == -1)
+            mPositionZ = mFrontViewHeight / 2;
 
         try {
             mRatioX = (float) mTopViewWidth / mSizeX;
@@ -236,7 +259,7 @@ public class CraneView extends View {
         mBorderWidth = convertCmToPixel(mSizeBorder, AXIS_X);
 
         //MUST CALL THIS
-        setMeasuredDimension(width, height);
+        setMeasuredDimension(mTopViewWidth + mFrontViewWidth, mTopViewHeight);
     }
 
     @Override
@@ -296,9 +319,9 @@ public class CraneView extends View {
         paint.setTextSize(20);
         canvas.drawText(String.format("x = %d y = %d z = %d", mPositionX, mPositionY, mPositionZ), 10, 25, paint);
 
-        float actualPositionX = pixelToCm(mPositionX, AXIS_X);
-        float actualPositionY = pixelToCm(mPositionY, AXIS_Y);
-        float actualPositionZ = pixelToCm(mPositionZ, AXIS_Z);
+        float actualPositionX = pixelToCm(mPositionX - mBorderWidth, AXIS_X);
+        float actualPositionY = pixelToCm(mPositionY - mBorderWidth, AXIS_Y);
+        float actualPositionZ = pixelToCm(mPositionZ - mBorderWidth, AXIS_Z);
 
         canvas.drawText(String.format("x = %f y = %f z = %f", actualPositionX, actualPositionY, actualPositionZ), 10, 45, paint);
 
@@ -402,7 +425,9 @@ public class CraneView extends View {
                 handled = true;
 
                 if (mListener != null && throwEvent)
-                    mListener.onPositionChangeEvent(mPositionX, mPositionY, mPositionZ);
+                    mListener.onPositionChangeEvent(pixelToCm(mPositionX - mBorderWidth, AXIS_X),
+                            pixelToCm(mPositionY - mBorderWidth, AXIS_Y),
+                            pixelToCm(mPositionZ - mBorderWidth, AXIS_Z));
 
                 break;
 
@@ -423,7 +448,9 @@ public class CraneView extends View {
                 handled = true;
 
                 if (mListener != null && throwEvent)
-                    mListener.onPositionChangeEvent(mPositionX, mPositionY, mPositionZ);
+                    mListener.onPositionChangeEvent(pixelToCm(mPositionX - mBorderWidth, AXIS_X),
+                            pixelToCm(mPositionY - mBorderWidth, AXIS_Y),
+                            pixelToCm(mPositionZ - mBorderWidth, AXIS_Z));
 
                 break;
 
@@ -439,14 +466,14 @@ public class CraneView extends View {
         return super.onTouchEvent(event) || handled;
     }
 
-    private float convertCmToPixel(int sizeInCm, int axis) {
+    private int convertCmToPixel(float sizeInCm, int axis) {
         switch (axis) {
             case AXIS_X:
-                return sizeInCm * mRatioX;
+                return (int) (sizeInCm * mRatioX);
             case AXIS_Y:
-                return sizeInCm * mRatioY;
+                return (int) (sizeInCm * mRatioY);
             case AXIS_Z:
-                return sizeInCm * mRatioZ;
+                return (int) (sizeInCm * mRatioZ);
         }
         return 0;
     }
