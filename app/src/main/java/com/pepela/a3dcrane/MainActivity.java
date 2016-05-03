@@ -8,22 +8,15 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 public class MainActivity extends AppCompatActivity implements CraneView.OnCranePositionChangeEventListener {
 
     CraneView craneView;
 
-    final Handler mHandler = new Handler();
     private Receiver udpReceiveBroadcastReceiver;
     private IntentFilter filter;
     private Intent serviceIntent;
@@ -66,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                     mZEditText.setError("Required");
                     itsOk = false;
                 }
-
                 if (!itsOk)
                     return;
 
@@ -78,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                 craneView.setPosition(x, y, z);
 
                 SendDataTask sdt = new SendDataTask();
+                sdt.setIp("192.168.0.5");
+                sdt.setPort(25000);
                 sdt.execute(x, y, z);
             }
         });
@@ -131,14 +125,15 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     @Override
     public void onPositionChangeEvent(float x, float y, float z) {
         //Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s  z: %s", x, y, z), Toast.LENGTH_SHORT).show();
-        //startCommunication(x, y);
 
         mXEditText.setText(String.format("%.2f", x));
         mYEditText.setText(String.format("%.2f", y));
         mZEditText.setText(String.format("%.2f", z));
 
-        SendDataTask sdt = new SendDataTask();
-        sdt.execute(x, y, z);
+        SendDataTask sendDataTask = new SendDataTask();
+        sendDataTask.setIp("192.168.0.5");
+        sendDataTask.setPort(25000);
+        sendDataTask.execute(x, y, z);
     }
 
 

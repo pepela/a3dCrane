@@ -165,13 +165,10 @@ public class CraneView extends View {
 
     public void setPosition(@NonNull float cranePositionX, @NonNull float cranePositionY, @NonNull float cranePositionZ) {
 
-        this.mPositionX = mBorderWidth + convertCmToPixel(cranePositionX, AXIS_X);
-        this.mPositionY = mBorderWidth + convertCmToPixel(cranePositionY, AXIS_Y);
-        this.mPositionZ = mBorderWidth + convertCmToPixel(cranePositionZ, AXIS_Z);
+        this.mPositionX = mBorderWidth + cmToPixel(cranePositionX, AXIS_X);
+        this.mPositionY = mBorderWidth + cmToPixel(cranePositionY, AXIS_Y);
+        this.mPositionZ = mBorderWidth + cmToPixel(cranePositionZ, AXIS_Z);
 
-//        this.mPositionX = cranePositionX;
-//        this.mPositionY = cranePositionY;
-//        this.mPositionY = cranePositionZ;
         invalidate();
     }
 
@@ -256,7 +253,7 @@ public class CraneView extends View {
             e.printStackTrace();
         }
 
-        mBorderWidth = convertCmToPixel(mSizeBorder, AXIS_X);
+        mBorderWidth = cmToPixel(mSizeBorder, AXIS_X);
 
         //MUST CALL THIS
         setMeasuredDimension(mTopViewWidth + mFrontViewWidth, mTopViewHeight);
@@ -330,9 +327,9 @@ public class CraneView extends View {
 
     private void drawIntervals(Canvas canvas) {
 
-        int intervalLengthInPixelsX = (int) convertCmToPixel(mIntervalSize, AXIS_X);//mIntervalSize * (int) mRatioX;
-        int intervalLengthInPixelsY = (int) convertCmToPixel(mIntervalSize, AXIS_Y);//mIntervalSize * (int) mRatioX;
-        int intervalLengthInPixelsZ = (int) convertCmToPixel(mIntervalSize, AXIS_Z);//mIntervalSize * (int) mRatioZ;
+        int intervalLengthInPixelsX = (int) cmToPixel(mIntervalSize, AXIS_X);//mIntervalSize * (int) mRatioX;
+        int intervalLengthInPixelsY = (int) cmToPixel(mIntervalSize, AXIS_Y);//mIntervalSize * (int) mRatioX;
+        int intervalLengthInPixelsZ = (int) cmToPixel(mIntervalSize, AXIS_Z);//mIntervalSize * (int) mRatioZ;
 
         int intervalCountX = (mSizeX - 2 * mSizeBorder) / mIntervalSize; //mTopViewWidth / intervalLengthInPixelsX;
         int intervalCountY = (mSizeY - 2 * mSizeBorder) / mIntervalSize; //mTopViewHeight / intervalLengthInPixelsX;
@@ -466,14 +463,14 @@ public class CraneView extends View {
         return super.onTouchEvent(event) || handled;
     }
 
-    private int convertCmToPixel(float sizeInCm, int axis) {
+    public static int cmToPixel(float lengthInCm, int axis) {
         switch (axis) {
             case AXIS_X:
-                return (int) (sizeInCm * mRatioX);
+                return (int) (lengthInCm * mRatioX);
             case AXIS_Y:
-                return (int) (sizeInCm * mRatioY);
+                return (int) (lengthInCm * mRatioY);
             case AXIS_Z:
-                return (int) (sizeInCm * mRatioZ);
+                return (int) (lengthInCm * mRatioZ);
         }
         return 0;
     }

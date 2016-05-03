@@ -2,6 +2,7 @@ package com.pepela.a3dcrane;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.IOException;
@@ -15,9 +16,36 @@ import java.net.UnknownHostException;
  */
 public class SendDataTask extends AsyncTask<Float, Void, Void> {
 
-    int PORT = 25000;
+    private int mPort;
     InetAddress inet_addr;
     DatagramSocket socket;
+
+    public String getIp() {
+        return "1";
+    }
+
+    public boolean setIp(String ip) {
+        try {
+            inet_addr = InetAddress.getByName(ip);
+        } catch (UnknownHostException e) {
+            Log.e("Send data task", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public int getPort() {
+        return mPort;
+    }
+
+    public boolean setPort(int port) {
+        if (port > 0 && port <= 65535) {
+            this.mPort = port;
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     protected Void doInBackground(Float... params) {
@@ -25,16 +53,9 @@ public class SendDataTask extends AsyncTask<Float, Void, Void> {
         float y = params[1];
         float z = params[2];
 
-        byte[] ip_bytes = new byte[]{(byte) 10, (byte) 60, (byte) 3, (byte) 96};
-        try {
-            inet_addr = InetAddress.getByAddress(ip_bytes);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
         Log.wtf("UDP send task", "Sending data");
         byte[] buffer = new byte[]{(byte) x, (byte) y, (byte) z};
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inet_addr, PORT);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inet_addr, mPort);
         try {
             socket = new DatagramSocket();
             socket.send(packet);

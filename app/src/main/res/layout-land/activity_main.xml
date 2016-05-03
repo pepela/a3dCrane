@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     tools:context="com.pepela.a3dcrane.MainActivity">
 
     <com.pepela.a3dcrane.CraneView
@@ -22,30 +22,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <com.pepela.a3dcrane.CraneAngleView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Center" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/mainEditTextX"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="x"
@@ -53,7 +34,7 @@
 
         <EditText
             android:id="@+id/mainEditTextY"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="y"
@@ -61,7 +42,7 @@
 
         <EditText
             android:id="@+id/mainEditTextZ"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="z"
@@ -73,5 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/set" />
+
+        <com.pepela.a3dcrane.CraneAngleView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>
