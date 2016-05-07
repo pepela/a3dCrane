@@ -22,12 +22,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical">
 
         <EditText
             android:id="@+id/mainEditTextX"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:hint="x"
             android:inputType="numberDecimal" />
@@ -36,6 +39,8 @@
             android:id="@+id/mainEditTextY"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:hint="y"
             android:inputType="numberDecimal" />
@@ -44,6 +49,8 @@
             android:id="@+id/mainEditTextZ"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:hint="z"
             android:inputType="numberDecimal" />
@@ -56,6 +63,7 @@
             android:text="@string/set" />
 
         <com.pepela.a3dcrane.CraneAngleView
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

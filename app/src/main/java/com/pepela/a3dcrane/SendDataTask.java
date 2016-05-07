@@ -59,7 +59,7 @@ public class SendDataTask extends AsyncTask<Float, Void, Void> {
         try {
             socket = new DatagramSocket();
             socket.send(packet);
-            Log.wtf("UDP send task", "it worked idk");
+            Log.wtf("UDP send task", String.format("x = %f, y = %f, z = %f", x, y, z));
         } catch (IOException e) {
             Log.e("UDP send task", e.getMessage());
         }

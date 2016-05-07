@@ -11,4 +11,10 @@
         <attr name="border" format="integer" />
     </declare-styleable>
 
+    <declare-styleable name="CraneAngleView">
+        <attr name="craneColor" format="color" />
+        <attr name="dangerColor" format="color" />
+        <attr name="safeColor" format="color" />
+    </declare-styleable>
+
 </resources>

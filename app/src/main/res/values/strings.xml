@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">3D crane</string>
     <string name="set">Set</string>
+    <string name="settings">Settings</string>
+    <string name="pref_ip_key">pref_ip</string>
+    <string name="pref_ip_title">IP address</string>
+    <string name="pref_ip_default">192.168.5.27</string>
+
+    <string name="pref_sending_port_default">25001</string>
+    <string name="pref_sending_port_key">pref_sending_port</string>
+    <string name="pref_sending_port_title">Sending port</string>
+
+    <string name="pref_receiving_port_default">25000</string>
+    <string name="pref_receiving_port_key">pref_receiving_port</string>
+    <string name="pref_receiving_port_title">Receiving port</string>
 </resources>

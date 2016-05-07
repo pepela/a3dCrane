@@ -28,7 +28,7 @@ public class MatlabConnection extends Service {
 
     private void listenAndWaitAndThrowIntent() throws Exception {
 
-        byte[] recvBuf = new byte[3];
+        byte[] recvBuf = new byte[5];
         if (socket == null || socket.isClosed()) {
             socket = new DatagramSocket(mPortNumber);
             socket.setBroadcast(true);
@@ -93,7 +93,7 @@ public class MatlabConnection extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mPortNumber = intent.getIntExtra(PORT_NUMBER, 2501);
+        mPortNumber = intent.getIntExtra(PORT_NUMBER, 25001);
         shouldRestartSocketListen = true;
         startListenForUDPBroadcast();
         Log.i("UDP", "Service started");

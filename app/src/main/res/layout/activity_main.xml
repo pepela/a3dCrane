@@ -20,20 +20,25 @@
         app:lineColor="@color/red" />
 
     <LinearLayout
+        android:layout_marginTop="20dp"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <com.pepela.a3dcrane.CraneAngleView
+            android:layout_weight="2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <Button
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Home" />
 
         <Button
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Center" />
