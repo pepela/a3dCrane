@@ -24,7 +24,9 @@ public class CraneView extends View {
 
     //paints for lines and circle
     private Paint mLinePaint;
+    private Paint mShadowLinePaint;
     private Paint mCirclePaint;
+    private Paint mShadowCirclePaint;
     private Paint mBorderPaint;
     private Paint mIntervalPaint;
 
@@ -32,6 +34,11 @@ public class CraneView extends View {
     private int mPositionX = -1;
     private int mPositionY = -1;
     private int mPositionZ = -1;
+
+    //shadow circle coordinates
+    private int mShadowPositionX = 10;
+    private int mShadowPositionY = 10;
+    private int mShadowPositionZ = 10;
 
 
     //width and height of our view
@@ -94,6 +101,8 @@ public class CraneView extends View {
             mSizeY = a.getInt(R.styleable.CraneView_axisY, -1);
             mSizeZ = a.getInt(R.styleable.CraneView_axisZ, -1);
             mSizeBorder = a.getInt(R.styleable.CraneView_border, -1);
+
+            mIntervalSize = a.getInt(R.styleable.CraneView_interval, 20);
             init();
         } finally {
             a.recycle();
@@ -129,6 +138,7 @@ public class CraneView extends View {
             mSizeBorder = a.getInt(R.styleable.CraneView_border, -1);
 
 
+            mIntervalSize = a.getInt(R.styleable.CraneView_interval, 20);
             init();
         } finally {
             a.recycle();
@@ -150,8 +160,18 @@ public class CraneView extends View {
         mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setColor(lineColor);
 
+        mShadowLinePaint = new Paint();
+        mShadowLinePaint.setStyle(Paint.Style.STROKE);
+        mShadowLinePaint.setColor(lineColor);
+        mShadowLinePaint.setAlpha(70);
+
         mCirclePaint = new Paint();
         mCirclePaint.setColor(circleColor);
+
+
+        mShadowCirclePaint = new Paint();
+        mShadowCirclePaint.setColor(circleColor);
+        mShadowCirclePaint.setAlpha(70);
 
         mBorderPaint = new Paint();
         mBorderPaint.setStyle(Paint.Style.STROKE);
@@ -168,6 +188,15 @@ public class CraneView extends View {
         this.mPositionX = mBorderWidth + cmToPixel(cranePositionX, AXIS_X);
         this.mPositionY = mBorderWidth + cmToPixel(cranePositionY, AXIS_Y);
         this.mPositionZ = mBorderWidth + cmToPixel(cranePositionZ, AXIS_Z);
+
+        invalidate();
+    }
+
+    public void setShadowPosition(@NonNull float cranePositionX, @NonNull float cranePositionY, @NonNull float cranePositionZ) {
+
+        this.mShadowPositionX = mBorderWidth + cmToPixel(cranePositionX, AXIS_X);
+        this.mShadowPositionY = mBorderWidth + cmToPixel(cranePositionY, AXIS_Y);
+        this.mShadowPositionZ = mBorderWidth + cmToPixel(cranePositionZ, AXIS_Z);
 
         invalidate();
     }
@@ -283,19 +312,15 @@ public class CraneView extends View {
                 mBorderPaint);
 
 
-//        canvas.drawRect(mTopViewWidth,
-//                mBorderWidth / 2,
-//                mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
-//                mTopViewHeight - mBorderWidth / 2,
-//                mBorderPaint);
-
-
         //draw vertical and horizontal lines
         canvas.drawLine(mPositionX, mBorderWidth, mPositionX, mTopViewHeight, mLinePaint);
         canvas.drawLine(mBorderWidth, mPositionY, mTopViewWidth, mPositionY, mLinePaint);
+        canvas.drawLine(mShadowPositionX, mBorderWidth, mShadowPositionX, mTopViewHeight, mLinePaint);
+        canvas.drawLine(mBorderWidth, mShadowPositionY, mTopViewWidth, mShadowPositionY, mLinePaint);
 
         //draw center
         canvas.drawCircle(mPositionX, mPositionY, 20, mCirclePaint);
+        canvas.drawCircle(mShadowPositionX, mShadowPositionY, 20, mShadowCirclePaint);
 
         //draw up and down
         canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2,
@@ -308,7 +333,15 @@ public class CraneView extends View {
                 mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
                 mPositionZ,
                 mLinePaint);
+
+        canvas.drawLine(mTopViewWidth + mFrontViewWidth / 2,
+                mShadowPositionZ,
+                mTopViewWidth + mFrontViewWidth - mBorderWidth / 2,
+                mShadowPositionZ,
+                mLinePaint);
+
         canvas.drawCircle(mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2, mPositionZ, 20, mCirclePaint);
+        canvas.drawCircle(mTopViewWidth + mFrontViewWidth / 2 - mBorderWidth / 2, mShadowPositionZ, 20, mShadowCirclePaint);
 
         Paint paint = new Paint();
 

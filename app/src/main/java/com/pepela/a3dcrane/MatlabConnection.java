@@ -2,6 +2,9 @@ package com.pepela.a3dcrane;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 
 
 import android.app.Service;
@@ -28,26 +31,30 @@ public class MatlabConnection extends Service {
 
     private void listenAndWaitAndThrowIntent() throws Exception {
 
-        byte[] recvBuf = new byte[5];
+        byte[] recvBuf = new byte[24];
         if (socket == null || socket.isClosed()) {
             socket = new DatagramSocket(mPortNumber);
             socket.setBroadcast(true);
         }
         //socket.setSoTimeout(1000);
         DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+
+        DoubleBuffer db = ByteBuffer.wrap(recvBuf).order(ByteOrder.LITTLE_ENDIAN).asDoubleBuffer();
+
         Log.i("UDP", "Waiting for UDP broadcast");
         socket.receive(packet);
 
+        //db.limit(packet.getLength()/Double.SIZE);
+
         String senderIP = packet.getAddress().getHostAddress();
 
-        byte[] arr = packet.getData();
-        float x = (float) arr[0];
-        float y = (float) arr[1];
-        float z = (float) arr[2];
+        double x = db.get(0);
+        double y = db.get(1);
+        double z = db.get(2);
 
         Log.i("UDP", "Got UDB broadcast from " + senderIP + String.format("x = %f, y = %f, z = %f", x, y, z));
 
-        broadcastIntent(x, y, z);
+        broadcastIntent((float) x, (float) y, (float) z);
         socket.close();
     }
 
@@ -58,6 +65,25 @@ public class MatlabConnection extends Service {
         intent.putExtra(INTENT_DATA_Y, y);
         intent.putExtra(INTENT_DATA_Z, z);
         sendBroadcast(intent);
+    }
+
+    private byte[] toByteArray(double[] doubleArray) {
+        int times = Double.SIZE / Byte.SIZE;
+        byte[] bytes = new byte[doubleArray.length * times];
+        for (int i = 0; i < doubleArray.length; i++) {
+            ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
+        }
+
+        return bytes;
+    }
+
+    private double[] toDoubleArray(byte[] byteArray) {
+        int times = Double.SIZE / Byte.SIZE;
+        double[] doubles = new double[byteArray.length / times];
+        for (int i = 0; i < doubles.length; i++) {
+            doubles[i] = ByteBuffer.wrap(byteArray, i * times, times).getDouble();
+        }
+        return doubles;
     }
 
 
@@ -104,5 +130,6 @@ public class MatlabConnection extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 
 }

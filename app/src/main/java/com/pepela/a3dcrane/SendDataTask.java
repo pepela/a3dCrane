@@ -10,11 +10,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 
 /**
  * Created by giorg_000 on 27.04.2016.
  */
-public class SendDataTask extends AsyncTask<Float, Void, Void> {
+public class SendDataTask extends AsyncTask<Double, Void, Void> {
 
     private int mPort;
     InetAddress inet_addr;
@@ -46,16 +49,43 @@ public class SendDataTask extends AsyncTask<Float, Void, Void> {
         return false;
     }
 
+    private byte[] toByteArray(double[] doubleArray) {
+        int times = Double.SIZE / Byte.SIZE;
+        byte[] bytes = new byte[doubleArray.length * times];
+        for (int i = 0; i < doubleArray.length; i++) {
+            ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
+        }
+
+        return bytes;
+    }
+
+    private double[] toDoubleArray(byte[] byteArray) {
+        int times = Double.SIZE / Byte.SIZE;
+        double[] doubles = new double[byteArray.length / times];
+        for (int i = 0; i < byteArray.length; i++) {
+            doubles[i] = ByteBuffer.wrap(byteArray, i * times, times).getDouble();
+        }
+        return doubles;
+    }
+
 
     @Override
-    protected Void doInBackground(Float... params) {
-        float x = params[0];
-        float y = params[1];
-        float z = params[2];
+    protected Void doInBackground(Double... params) {
+        double x = params[0];
+        double y = params[1];
+        double z = params[2];
+
 
         Log.wtf("UDP send task", "Sending data");
-        byte[] buffer = new byte[]{(byte) x, (byte) y, (byte) z};
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inet_addr, mPort);
+
+        ByteBuffer bf= ByteBuffer.allocate(24);
+        bf.order(ByteOrder.LITTLE_ENDIAN);
+        bf.putDouble(x);
+        bf.putDouble(y);
+        bf.putDouble(z);
+        byte[] sendBuffer = bf.array();
+
+        DatagramPacket packet = new DatagramPacket(sendBuffer, sendBuffer.length, inet_addr, mPort);
         try {
             socket = new DatagramSocket();
             socket.send(packet);

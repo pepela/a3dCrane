@@ -9,6 +9,7 @@
         <attr name="axisY" format="integer" />
         <attr name="axisZ" format="integer" />
         <attr name="border" format="integer" />
+        <attr name="interval" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="CraneAngleView">

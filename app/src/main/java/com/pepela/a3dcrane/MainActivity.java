@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                 SendDataTask sdt = new SendDataTask();
                 sdt.setIp(ip);
                 sdt.setPort(port);
-                sdt.execute(x, y, z);
+                sdt.execute((double) x, (double) y, (double) z);
             }
         });
 
@@ -131,11 +130,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
             float y = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Y, 10);
             float z = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Z, 10);
 
-//            mXEditText.setText(String.format("%.2f", craneView.getXInCm()));
-//            mYEditText.setText(String.format("%.2f", craneView.getYInCm()));
-//            mZEditText.setText(String.format("%.2f", craneView.getZInCm()));
-
-            craneView.setPosition(x, y, z);
+            craneView.setShadowPosition(x, y, z);
             //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
         }
     }
@@ -169,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
         SendDataTask sendDataTask = new SendDataTask();
         sendDataTask.setIp(ip);
         sendDataTask.setPort(port);
-        sendDataTask.execute(x, y, z);
+        sendDataTask.execute((double) x, (double) y, (double) z);
     }
 
 
