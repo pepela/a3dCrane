@@ -52,9 +52,9 @@ public class CraneView extends View {
     private int mSizeBorder;
 
     //ration between physycal device measurements and pixels
-    private static float mRatioX;
-    private static float mRatioY;
-    private static float mRatioZ;
+    private static double mRatioX;
+    private static double mRatioY;
+    private static double mRatioZ;
 
     //interval size in cm, default is 10cm
     private int mIntervalSize = 20;
@@ -147,7 +147,7 @@ public class CraneView extends View {
 
 
     public interface OnCranePositionChangeEventListener {
-        void onPositionChangeEvent(float x, float y, float z);
+        void onPositionChangeEvent(double x, double y, double z);
     }
 
     public void setCranePositionChangeEventListener(OnCranePositionChangeEventListener eventListener) {
@@ -183,7 +183,7 @@ public class CraneView extends View {
         mIntervalPaint.setColor(Color.BLACK);
     }
 
-    public void setPosition(@NonNull float cranePositionX, @NonNull float cranePositionY, @NonNull float cranePositionZ) {
+    public void setPosition(@NonNull double cranePositionX, @NonNull double cranePositionY, @NonNull double cranePositionZ) {
 
         this.mPositionX = mBorderWidth + cmToPixel(cranePositionX, AXIS_X);
         this.mPositionY = mBorderWidth + cmToPixel(cranePositionY, AXIS_Y);
@@ -192,7 +192,7 @@ public class CraneView extends View {
         invalidate();
     }
 
-    public void setShadowPosition(@NonNull float cranePositionX, @NonNull float cranePositionY, @NonNull float cranePositionZ) {
+    public void setShadowPosition(@NonNull double cranePositionX, @NonNull double cranePositionY, @NonNull double cranePositionZ) {
 
         this.mShadowPositionX = mBorderWidth + cmToPixel(cranePositionX, AXIS_X);
         this.mShadowPositionY = mBorderWidth + cmToPixel(cranePositionY, AXIS_Y);
@@ -201,18 +201,16 @@ public class CraneView extends View {
         invalidate();
     }
 
-    public float getXInCm() {
+    public double getXInCm() {
         return pixelToCm(mPositionX - mBorderWidth, AXIS_X);
     }
 
-    public float getYInCm() {
-
+    public double getYInCm() {
         return pixelToCm(mPositionY - mBorderWidth, AXIS_Y);
     }
 
-    public float getZInCm() {
+    public double getZInCm() {
         return pixelToCm(mPositionZ - mBorderWidth, AXIS_Z);
-
     }
 
     @Override
@@ -275,9 +273,9 @@ public class CraneView extends View {
             mPositionZ = mFrontViewHeight / 2;
 
         try {
-            mRatioX = (float) mTopViewWidth / mSizeX;
-            mRatioY = (float) mTopViewHeight / mSizeY;
-            mRatioZ = (float) mFrontViewHeight / mSizeZ;
+            mRatioX = (double) mTopViewWidth / mSizeX;
+            mRatioY = (double) mTopViewHeight / mSizeY;
+            mRatioZ = (double) mFrontViewHeight / mSizeZ;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -349,9 +347,9 @@ public class CraneView extends View {
         paint.setTextSize(20);
         canvas.drawText(String.format("x = %d y = %d z = %d", mPositionX, mPositionY, mPositionZ), 10, 25, paint);
 
-        float actualPositionX = pixelToCm(mPositionX - mBorderWidth, AXIS_X);
-        float actualPositionY = pixelToCm(mPositionY - mBorderWidth, AXIS_Y);
-        float actualPositionZ = pixelToCm(mPositionZ - mBorderWidth, AXIS_Z);
+        double actualPositionX = pixelToCm(mPositionX - mBorderWidth, AXIS_X);
+        double actualPositionY = pixelToCm(mPositionY - mBorderWidth, AXIS_Y);
+        double actualPositionZ = pixelToCm(mPositionZ - mBorderWidth, AXIS_Z);
 
         canvas.drawText(String.format("x = %f y = %f z = %f", actualPositionX, actualPositionY, actualPositionZ), 10, 45, paint);
 
@@ -374,7 +372,7 @@ public class CraneView extends View {
                     mBorderWidth + intervalLengthInPixelsX * i,
                     mTopViewHeight - mBorderWidth,
                     mIntervalPaint);
-            canvas.drawText(Float.toString(i * mIntervalSize),
+            canvas.drawText(Double.toString(i * mIntervalSize),
                     mBorderWidth + intervalLengthInPixelsX * i + 5,
                     mTopViewHeight - 5,
                     mIntervalPaint);
@@ -384,7 +382,7 @@ public class CraneView extends View {
                 mTopViewWidth - mBorderWidth,
                 mTopViewHeight - mBorderWidth,
                 mIntervalPaint);
-        canvas.drawText(Float.toString(mSizeX - 2 * mSizeBorder),
+        canvas.drawText(Double.toString(mSizeX - 2 * mSizeBorder),
                 mTopViewWidth - mBorderWidth,
                 mTopViewHeight - 5,
                 mIntervalPaint);
@@ -396,7 +394,7 @@ public class CraneView extends View {
                     mBorderWidth + intervalLengthInPixelsY * i,
                     mIntervalPaint);
 
-            canvas.drawText(Float.toString(i * mIntervalSize),
+            canvas.drawText(Double.toString(i * mIntervalSize),
                     mTopViewWidth - mBorderWidth,
                     mBorderWidth + intervalLengthInPixelsY * i - 5,
                     mIntervalPaint);
@@ -407,7 +405,7 @@ public class CraneView extends View {
                 mTopViewHeight - mBorderWidth,
                 mIntervalPaint);
 
-        canvas.drawText(Float.toString(mSizeY - 2 * mSizeBorder),
+        canvas.drawText(Double.toString(mSizeY - 2 * mSizeBorder),
                 mTopViewWidth - mBorderWidth,
                 mTopViewHeight - mBorderWidth - 5,
                 mIntervalPaint);
@@ -419,7 +417,7 @@ public class CraneView extends View {
                     mBorderWidth + intervalLengthInPixelsZ * i,
                     mIntervalPaint);
 
-            canvas.drawText(Float.toString(i * mIntervalSize),
+            canvas.drawText(Double.toString(i * mIntervalSize),
                     mTopViewWidth + mFrontViewWidth - mBorderWidth,
                     mBorderWidth + intervalLengthInPixelsZ * i,
                     mIntervalPaint);
@@ -496,7 +494,7 @@ public class CraneView extends View {
         return super.onTouchEvent(event) || handled;
     }
 
-    public static int cmToPixel(float lengthInCm, int axis) {
+    public static int cmToPixel(double lengthInCm, int axis) {
         switch (axis) {
             case AXIS_X:
                 return (int) (lengthInCm * mRatioX);
@@ -526,7 +524,7 @@ public class CraneView extends View {
         return false;
     }
 
-    public static float pixelToCm(int lengthInPixels, int axis) {
+    public static double pixelToCm(int lengthInPixels, int axis) {
         switch (axis) {
             case AXIS_X:
                 return lengthInPixels / mRatioX;

@@ -67,11 +67,12 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                     return;
 
 
-                float x = Float.valueOf(xStr);
-                float y = Float.valueOf(yStr);
-                float z = Float.valueOf(zStr);
+                double x = Double.valueOf(xStr);
+                double y = Double.valueOf(yStr);
+                double z = Double.valueOf(zStr);
 
                 craneView.setPosition(x, y, z);
+                craneView.setShadowPosition(x, y, z);
 
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
                 SendDataTask sdt = new SendDataTask();
                 sdt.setIp(ip);
                 sdt.setPort(port);
-                sdt.execute((double) x, (double) y, (double) z);
+                sdt.execute(x, y, z);
             }
         });
 
@@ -126,9 +127,9 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            float x = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_X, 10);
-            float y = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Y, 10);
-            float z = arg1.getFloatExtra(MatlabConnection.INTENT_DATA_Z, 10);
+            double x = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_X, 10);
+            double y = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y, 10);
+            double z = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Z, 10);
 
             craneView.setShadowPosition(x, y, z);
             //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     }
 
     @Override
-    public void onPositionChangeEvent(float x, float y, float z) {
+    public void onPositionChangeEvent(double x, double y, double z) {
         //Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s  z: %s", x, y, z), Toast.LENGTH_SHORT).show();
 
 //        mXEditText.setText(String.format("%.2f", x));
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
         SendDataTask sendDataTask = new SendDataTask();
         sendDataTask.setIp(ip);
         sendDataTask.setPort(port);
-        sendDataTask.execute((double) x, (double) y, (double) z);
+        sendDataTask.execute(x, y, z);
     }
 
 

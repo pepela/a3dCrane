@@ -54,11 +54,11 @@ public class MatlabConnection extends Service {
 
         Log.i("UDP", "Got UDB broadcast from " + senderIP + String.format("x = %f, y = %f, z = %f", x, y, z));
 
-        broadcastIntent((float) x, (float) y, (float) z);
+        broadcastIntent(x, y, z);
         socket.close();
     }
 
-    private void broadcastIntent(float x, float y, float z) {
+    private void broadcastIntent(double x, double y, double z) {
         Log.i("Broadcast", "broadcasting intent");
         Intent intent = new Intent(UDP_BROADCAST);
         intent.putExtra(INTENT_DATA_X, x);
