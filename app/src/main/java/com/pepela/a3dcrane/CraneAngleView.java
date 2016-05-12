@@ -165,7 +165,7 @@ public class CraneAngleView extends View {
         double aH = Math.cos(angleHorizontal) * height;
         double aV = Math.cos(angleVertical) * height;
 
-        mCranePositionX += aH;
-        mCranePositionY += aV;
+//        mCranePositionX += aH;
+//        mCranePositionY += aV;
     }
 }

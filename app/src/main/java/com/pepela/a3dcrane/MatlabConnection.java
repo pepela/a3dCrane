@@ -17,6 +17,8 @@ public class MatlabConnection extends Service {
     public static String INTENT_DATA_X = "a3dcrane.intent_data.x";
     public static String INTENT_DATA_Y = "a3dcrane.intent_data.y";
     public static String INTENT_DATA_Z = "a3dcrane.intent_data.z";
+    public static final String INTENT_DATA_X_ANGLE = "a3dcrane.intent_data.xAngle";
+    public static final String INTENT_DATA_Y_ANGLE = "a3dcrane.intent_data.yAngle";
     public static String PORT_NUMBER = "a3dcrane.intent_data.port_number";
 
 
@@ -31,7 +33,7 @@ public class MatlabConnection extends Service {
 
     private void listenAndWaitAndThrowIntent() throws Exception {
 
-        byte[] recvBuf = new byte[24];
+        byte[] recvBuf = new byte[40];
         if (socket == null || socket.isClosed()) {
             socket = new DatagramSocket(mPortNumber);
             socket.setBroadcast(true);
@@ -51,19 +53,23 @@ public class MatlabConnection extends Service {
         double x = db.get(0);
         double y = db.get(1);
         double z = db.get(2);
+        double xAngle = db.get(3);
+        double yAngle = db.get(4);
 
-        Log.i("UDP", "Got UDB broadcast from " + senderIP + String.format("x = %f, y = %f, z = %f", x, y, z));
+        Log.i("UDP", String.format("Got UDB broadcast from: %s x = %f, y = %f, z = %f, xAngle = %f, yAngle = %f", senderIP, x, y, z, xAngle, yAngle));
 
-        broadcastIntent(x, y, z);
+        broadcastIntent(x, y, z, xAngle, yAngle);
         socket.close();
     }
 
-    private void broadcastIntent(double x, double y, double z) {
+    private void broadcastIntent(double x, double y, double z, double xAngle, double yAngle) {
         Log.i("Broadcast", "broadcasting intent");
         Intent intent = new Intent(UDP_BROADCAST);
         intent.putExtra(INTENT_DATA_X, x);
         intent.putExtra(INTENT_DATA_Y, y);
         intent.putExtra(INTENT_DATA_Z, z);
+        intent.putExtra(INTENT_DATA_X_ANGLE, xAngle);
+        intent.putExtra(INTENT_DATA_Y_ANGLE, yAngle);
         sendBroadcast(intent);
     }
 
