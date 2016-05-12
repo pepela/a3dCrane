@@ -13,13 +13,15 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class MatlabConnection extends Service {
-    public static String UDP_BROADCAST = "UDPBroadcast";
-    public static String INTENT_DATA_X = "a3dcrane.intent_data.x";
-    public static String INTENT_DATA_Y = "a3dcrane.intent_data.y";
-    public static String INTENT_DATA_Z = "a3dcrane.intent_data.z";
+    public static final String UDP_BROADCAST = "UDPBroadcast";
+
+    public static final String INTENT_DATA_X = "a3dcrane.intent_data.x";
+    public static final String INTENT_DATA_Y = "a3dcrane.intent_data.y";
+    public static final String INTENT_DATA_Z = "a3dcrane.intent_data.z";
     public static final String INTENT_DATA_X_ANGLE = "a3dcrane.intent_data.xAngle";
     public static final String INTENT_DATA_Y_ANGLE = "a3dcrane.intent_data.yAngle";
-    public static String PORT_NUMBER = "a3dcrane.intent_data.port_number";
+
+    public static final String PORT_NUMBER = "a3dcrane.intent_data.port_number";
 
 
     private int mPortNumber;

@@ -10,6 +10,7 @@ import android.graphics.Path;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -165,7 +166,20 @@ public class CraneAngleView extends View {
         double aH = Math.cos(angleHorizontal) * height;
         double aV = Math.cos(angleVertical) * height;
 
-//        mCranePositionX += aH;
-//        mCranePositionY += aV;
+        mCranePositionX += aH;
+        mCranePositionY += aV;
+    }
+
+    public void setCraneAngle(double angleHorizontal, double angleVertical) {
+
+        double y = mViewCenterY / 2 * angleVertical + mViewCenterY;
+        double x = mViewCenterX / 2 * angleHorizontal + mViewCenterX;
+
+        mCranePositionX = (int) x;
+        mCranePositionY = (int) y;
+
+
+        Log.wtf("Didi yle", "x positon =" + Integer.toString(mCranePositionX) + " y position = " + Integer.toString(mCranePositionY));
+        invalidate();
     }
 }

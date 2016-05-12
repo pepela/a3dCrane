@@ -20,7 +20,8 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity implements CraneView.OnCranePositionChangeEventListener {
 
-    CraneView craneView;
+    private CraneView craneView;
+    private CraneAngleView craneAngleView;
 
     private Receiver udpReceiveBroadcastReceiver;
     private IntentFilter filter;
@@ -40,7 +41,9 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         craneView = (CraneView) findViewById(R.id.crane);
+        craneAngleView = (CraneAngleView) findViewById(R.id.craneAngleView);
 
         mXEditText = (EditText) findViewById(R.id.mainEditTextX);
         mYEditText = (EditText) findViewById(R.id.mainEditTextY);
@@ -184,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements CraneView.OnCrane
             double yAngle = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y_ANGLE, 0);
 
             craneView.setShadowPosition(x, y, z);
-
+            craneAngleView.setCraneAngle(xAngle, yAngle);
             //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
         }
     }
