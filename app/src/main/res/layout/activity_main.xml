@@ -11,13 +11,13 @@
         android:id="@+id/crane"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:axisX="100"
-        app:axisY="100"
-        app:axisZ="100"
+        app:axisX="58"
+        app:axisY="72"
+        app:axisZ="56"
         app:border="4"
         app:borderColor="@color/yellow"
         app:circleColor="@color/blue"
-        app:interval="20"
+        app:interval="15"
         app:lineColor="@color/red" />
 
     <LinearLayout

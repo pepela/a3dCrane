@@ -20,209 +20,202 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity implements CraneView.OnCranePositionChangeEventListener {
 
-    private CraneView craneView;
-    private CraneAngleView craneAngleView;
+	private CraneView craneView;
+	private CraneAngleView craneAngleView;
 
-    private Receiver udpReceiveBroadcastReceiver;
-    private IntentFilter filter;
-    private Intent serviceIntent;
+	private Receiver udpReceiveBroadcastReceiver;
+	private IntentFilter filter;
+	private Intent serviceIntent;
 
-    private Button mSetButton;
-    private Button mHomeButton;
-    private Button mCenterButton;
-
-
-    private EditText mXEditText;
-    private EditText mYEditText;
-    private EditText mZEditText;
+	private Button mSetButton;
+	private Button mHomeButton;
+	private Button mCenterButton;
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        craneView = (CraneView) findViewById(R.id.crane);
-        craneAngleView = (CraneAngleView) findViewById(R.id.craneAngleView);
-
-        mXEditText = (EditText) findViewById(R.id.mainEditTextX);
-        mYEditText = (EditText) findViewById(R.id.mainEditTextY);
-        mZEditText = (EditText) findViewById(R.id.mainEditTextZ);
-
-        mSetButton = (Button) findViewById(R.id.mainButtonSet);
-        try {
-            mHomeButton = (Button) findViewById(R.id.mainButtonHome);
-            mCenterButton = (Button) findViewById(R.id.mainButtonCenter);
-        } catch (Exception e) {
-            Log.i("Main", "Landscape mode has no extra buttons");
-        }
-
-        mSetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                boolean itsOk = true;
-
-                String xStr = mXEditText.getText().toString();
-                String yStr = mYEditText.getText().toString();
-                String zStr = mZEditText.getText().toString();
-
-                if (TextUtils.isEmpty(xStr)) {
-                    mXEditText.setError("Required");
-                    itsOk = false;
-                } else if (TextUtils.isEmpty(yStr)) {
-                    mYEditText.setError("Required");
-                    itsOk = false;
-                } else if (TextUtils.isEmpty(zStr)) {
-                    mZEditText.setError("Required");
-                    itsOk = false;
-                }
-                if (!itsOk)
-                    return;
-
-                double x = Double.valueOf(xStr);
-                double y = Double.valueOf(yStr);
-                double z = Double.valueOf(zStr);
-
-                craneView.setPosition(x, y, z);
-
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
-                int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
-
-                SendDataTask sdt = new SendDataTask();
-                sdt.setIp(ip);
-                sdt.setPort(port);
-                sdt.execute(x, y, z);
-            }
-        });
+	private EditText mXEditText;
+	private EditText mYEditText;
+	private EditText mZEditText;
 
 
-        if (mCenterButton != null)
-            mCenterButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    double x = 46;
-                    double y = 46;
-                    double z = 50;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
 
-                    craneView.setPosition(x, y, z);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
-                    int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
+		craneView = (CraneView) findViewById(R.id.crane);
+		craneAngleView = (CraneAngleView) findViewById(R.id.craneAngleView);
 
-                    SendDataTask sdt = new SendDataTask();
-                    sdt.setIp(ip);
-                    sdt.setPort(port);
-                    sdt.execute(x, y, z);
-                }
-            });
+		mXEditText = (EditText) findViewById(R.id.mainEditTextX);
+		mYEditText = (EditText) findViewById(R.id.mainEditTextY);
+		mZEditText = (EditText) findViewById(R.id.mainEditTextZ);
 
-        if (mHomeButton != null)
-            mHomeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    double x = 0;
-                    double y = 0;
-                    double z = 0;
+		mSetButton = (Button) findViewById(R.id.mainButtonSet);
+		try {
+			mHomeButton = (Button) findViewById(R.id.mainButtonHome);
+			mCenterButton = (Button) findViewById(R.id.mainButtonCenter);
+		} catch (Exception e) {
+			Log.i("Main", "Landscape mode has no extra buttons");
+		}
 
-                    craneView.setPosition(x, y, z);
+		mSetButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
 
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
-                    int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
+				boolean itsOk = true;
 
-                    SendDataTask sdt = new SendDataTask();
-                    sdt.setIp(ip);
-                    sdt.setPort(port);
-                    sdt.execute(x, y, z);
-                }
-            });
+				String xStr = mXEditText.getText().toString();
+				String yStr = mYEditText.getText().toString();
+				String zStr = mZEditText.getText().toString();
 
-        mXEditText.setText(String.format("%.2f", 0.0)); //craneView.getXInCm()));
-        mYEditText.setText(String.format("%.2f", 0.0)); //craneView.getYInCm()));
-        mZEditText.setText(String.format("%.2f", 0.0)); //craneView.getZInCm()));
+				if (TextUtils.isEmpty(xStr)) {
+					mXEditText.setError("Required");
+					itsOk = false;
+				} else if (TextUtils.isEmpty(yStr)) {
+					mYEditText.setError("Required");
+					itsOk = false;
+				} else if (TextUtils.isEmpty(zStr)) {
+					mZEditText.setError("Required");
+					itsOk = false;
+				}
+				if (!itsOk)
+					return;
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_receiving_port_key), "25001"));
+				double x = Double.valueOf(xStr);
+				double y = Double.valueOf(yStr);
+				double z = Double.valueOf(zStr);
+				craneView.setPosition(x, y, z);
 
-        serviceIntent = new Intent(this, MatlabConnection.class);
-        serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, port);
-        startService(serviceIntent);
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+				String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
+				int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
 
-        udpReceiveBroadcastReceiver = new Receiver();
-        filter = new IntentFilter(MatlabConnection.UDP_BROADCAST);
+				SendDataTask sdt = new SendDataTask();
+				sdt.setIp(ip);
+				sdt.setPort(port);
+				sdt.execute(x / 100, y / 100, z / 100);
+			}
+		});
 
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return true;
-    }
+		if (mCenterButton != null)
+			mCenterButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					double x = 15;
+					double y = 15;
+					double z = 25;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+					craneView.setPosition(x, y, z);
 
-    private class Receiver extends BroadcastReceiver {
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+					String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
+					int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "2500"));
 
-        @Override
-        public void onReceive(Context arg0, Intent arg1) {
-            double x = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_X, 10);
-            double y = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y, 10);
-            double z = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Z, 10);
-            double xAngle = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_X_ANGLE, 0);
-            double yAngle = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y_ANGLE, 0);
+					SendDataTask sdt = new SendDataTask();
+					sdt.setIp(ip);
+					sdt.setPort(port);
+					sdt.execute(x / 100, y / 100, z / 100);
+				}
+			});
 
-            craneView.setShadowPosition(x, y, z);
-            craneAngleView.setCraneAngle(xAngle, yAngle);
-            //Toast.makeText(arg0, url, Toast.LENGTH_SHORT).show();
-        }
-    }
+		if (mHomeButton != null)
+			mHomeButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					double x = 0;
+					double y = 0;
+					double z = 0;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        this.registerReceiver(udpReceiveBroadcastReceiver, filter);
-        craneView.setCranePositionChangeEventListener(this);
-    }
+					craneView.setPosition(x, y, z);
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopService(serviceIntent);
-        this.unregisterReceiver(udpReceiveBroadcastReceiver);
-    }
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+					String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
+					int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "2500"));
 
-    @Override
-    public void onPositionChangeEvent(double x, double y, double z) {
-        //Toast.makeText(getApplicationContext(), String.format("x: %s  y: %s  z: %s", x, y, z), Toast.LENGTH_SHORT).show();
+					SendDataTask sdt = new SendDataTask();
+					sdt.setIp(ip);
+					sdt.setPort(port);
+					sdt.execute(x, y, z);
+				}
+			});
 
-//        mXEditText.setText(String.format("%.2f", x));
-//        mYEditText.setText(String.format("%.2f", y));
-//        mZEditText.setText(String.format("%.2f", z));
+		mXEditText.setText(String.format("%.2f", 0.0)); //craneView.getXInCm()));
+		mYEditText.setText(String.format("%.2f", 0.0)); //craneView.getYInCm()));
+		mZEditText.setText(String.format("%.2f", 0.0)); //craneView.getZInCm()));
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
-        int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_receiving_port_key), "25001"));
 
-        SendDataTask sendDataTask = new SendDataTask();
-        sendDataTask.setIp(ip);
-        sendDataTask.setPort(port);
-        sendDataTask.execute(x, y, z);
-    }
+		serviceIntent = new Intent(this, MatlabConnection.class);
+		serviceIntent.putExtra(MatlabConnection.PORT_NUMBER, port);
+		startService(serviceIntent);
+
+		udpReceiveBroadcastReceiver = new Receiver();
+		filter = new IntentFilter(MatlabConnection.UDP_BROADCAST);
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case R.id.settings:
+				Intent settingsIntent = new Intent(this, SettingsActivity.class);
+				startActivity(settingsIntent);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private class Receiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			double x = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_X, 10);
+			double y = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y, 10);
+			double z = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Z, 10);
+			double xAngle = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_X_ANGLE, 0);
+			double yAngle = arg1.getDoubleExtra(MatlabConnection.INTENT_DATA_Y_ANGLE, 0);
+
+			craneView.setShadowPosition(x * 100, y * 100, z * 100);
+			craneAngleView.setCraneAngle(xAngle, yAngle);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		this.registerReceiver(udpReceiveBroadcastReceiver, filter);
+		craneView.setCranePositionChangeEventListener(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		stopService(serviceIntent);
+		this.unregisterReceiver(udpReceiveBroadcastReceiver);
+	}
+
+	@Override
+	public void onPositionChangeEvent(double x, double y, double z) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String ip = sharedPreferences.getString(getString(R.string.pref_ip_key), getString(R.string.pref_ip_default));
+		int port = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_sending_port_key), "88"));
+
+		SendDataTask sendDataTask = new SendDataTask();
+		sendDataTask.setIp(ip);
+		sendDataTask.setPort(port);
+		sendDataTask.execute(x / 100, y / 100, z / 100);
+	}
 
 
 }
